@@ -1,0 +1,15 @@
+services:
+  home_mgmt:
+    image: postgres:16.3
+    container_name: home_mgmt
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: Saratoga@02
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - 5433:5432
+volumes:
+  postgres_data:
+    external: true
+    name: postgres_data
