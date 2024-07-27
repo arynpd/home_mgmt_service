@@ -4,7 +4,7 @@ services:
     container_name: home_mgmt
     restart: always
     environment:
-      POSTGRES_PASSWORD: Saratoga@02
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
