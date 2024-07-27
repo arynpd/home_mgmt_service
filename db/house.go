@@ -16,7 +16,7 @@ type House struct {
 
 func (db *Db) CreateHouse(h *House) error {
 	stmt := `insert into home_schema.house (street, city, state, zip) values ($1, $2, $3, $4) returning id`
-	tx, err := db.pool.BeginTx(context.Background(), pgx.TxOptions{})
+	tx, err := db.Pool.BeginTx(context.Background(), pgx.TxOptions{})
 	if err != nil {
 		return err
 	}

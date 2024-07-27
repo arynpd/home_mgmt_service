@@ -9,7 +9,7 @@ import (
 )
 
 type Db struct {
-	pool *pgxpool.Pool
+	Pool *pgxpool.Pool
 }
 
 func (db *Db) Init() error {
@@ -25,10 +25,10 @@ func (db *Db) Init() error {
 	}
 	fmt.Printf("%s\n", greeting)
 
-	db.pool = pool
+	db.Pool = pool
 	return nil
 }
 
 func (db *Db) Close() {
-	db.pool.Close()
+	db.Pool.Close()
 }
