@@ -9,7 +9,9 @@ import (
 )
 
 func TestCreateHouse(t *testing.T) {
-	dbPool := setupDbPool()
+	transaction := setupTransaction()
+	defer transaction.Rollback()
+
 	t.Run("Create house success", func(t *testing.T) {
 		house := &db.House{
 			Street: "6118 Bummy Ln",
@@ -18,13 +20,16 @@ func TestCreateHouse(t *testing.T) {
 			Zip:    69420,
 		}
 
-		err := dbPool.CreateHouse(house)
+		err := transaction.CreateHouse(house)
 		assert.NoError(t, err)
+
 	})
+
 }
 
 func TestUpdateHouse(t *testing.T) {
-	dbPool := setupDbPool()
+	transaction := setupTransaction()
+	defer transaction.Rollback()
 
 	t.Run("Update house success", func(t *testing.T) {
 		house := &db.House{
@@ -33,11 +38,11 @@ func TestUpdateHouse(t *testing.T) {
 			State:  "TX",
 			Zip:    69420,
 		}
-		err := dbPool.CreateHouse(house)
+		err := transaction.CreateHouse(house)
 		assert.NoError(t, err)
 
 		house.State = "VA"
-		err = dbPool.UpdateHouse(house)
+		err = transaction.UpdateHouse(house)
 		assert.NoError(t, err)
 	})
 
@@ -50,7 +55,8 @@ func TestUpdateHouse(t *testing.T) {
 			Zip:    21421,
 		}
 
-		err := dbPool.UpdateHouse(house)
+		err := transaction.UpdateHouse(house)
 		assert.EqualError(t, err, fmt.Sprintf("Could not find house with id: %d", house.Id))
 	})
+
 }

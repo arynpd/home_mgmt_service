@@ -13,12 +13,12 @@ type House struct {
 	Zip    int    `json:"zip"`
 }
 
-func (db *Db) CreateHouse(h *House) error {
+func (t *Transaction) CreateHouse(h *House) error {
 	stmt := `insert into home_schema.house (street, city, state, zip) 
 			values ($1, $2, $3, $4) 
 			returning id`
 
-	err := db.Pool.QueryRow(context.Background(), stmt, h.Street, h.City, h.State, h.Zip).Scan(&h.Id)
+	err := t.transaction.QueryRow(context.Background(), stmt, h.Street, h.City, h.State, h.Zip).Scan(&h.Id)
 	if err != nil {
 		return err
 	}
@@ -26,12 +26,12 @@ func (db *Db) CreateHouse(h *House) error {
 	return nil
 }
 
-func (db *Db) UpdateHouse(h *House) error {
+func (t *Transaction) UpdateHouse(h *House) error {
 	stmt := `update home_schema.house
 			set street = $1, city = $2, state = $3, zip = $4
 			where id = $5`
 
-	tag, err := db.Pool.Exec(context.Background(), stmt, h.Street, h.City, h.State, h.Zip, h.Id)
+	tag, err := t.transaction.Exec(context.Background(), stmt, h.Street, h.City, h.State, h.Zip, h.Id)
 	if err != nil {
 		return err
 	}

@@ -40,7 +40,7 @@ func (db *Db) Close() {
 
 func (db *Db) BeginTransaction() (*Transaction, error) {
 	t := &Transaction{}
-	tx, err := db.pool.BeginTx(context.Background(), pgx.TxOptions{})
+	tx, err := db.Pool.BeginTx(context.Background(), pgx.TxOptions{})
 	if err != nil {
 		return nil, err
 	}

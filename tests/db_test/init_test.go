@@ -15,7 +15,7 @@ import (
 	"github.com/ory/dockertest/v3/docker"
 )
 
-var pool *pgxpool.Pool
+var dbPool = &db.Db{}
 
 func TestMain(m *testing.M) {
 	err := godotenv.Load("../../.env")
@@ -52,6 +52,7 @@ func TestMain(m *testing.M) {
 		log.Fatalf("Could not start resource: %s", err)
 	}
 
+	var pool *pgxpool.Pool
 	if err := docker_pool.Retry(func() error {
 		var err error
 		pool, err = pgxpool.New(context.Background(), fmt.Sprintf(os.Getenv("TEST_DB_URL"), resource.GetPort("5432/tcp")))
@@ -69,6 +70,7 @@ func TestMain(m *testing.M) {
 		}
 	}()
 
+	dbPool.Pool = pool
 	err = setupSchema()
 	if err != nil {
 		log.Fatalf("Could not setup schema: %s", err)
@@ -86,15 +88,17 @@ func setupSchema() error {
 	}
 
 	sql := string(c)
-	_, err = pool.Exec(context.Background(), sql)
+	_, err = dbPool.Pool.Exec(context.Background(), sql)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func setupDbPool() *db.Db {
-	return &db.Db{
-		Pool: pool,
+func setupTransaction() *db.Transaction {
+	transaction, err := dbPool.BeginTransaction()
+	if err != nil {
+		log.Fatalf("Error starting transaction: %s", err)
 	}
+	return transaction
 }
