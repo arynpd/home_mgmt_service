@@ -3,6 +3,8 @@ package db
 import (
 	"context"
 	"fmt"
+
+	"github.com/jackc/pgx/v5"
 )
 
 type House struct {
@@ -49,6 +51,9 @@ func (t *Transaction) GetHouseById(h *House) error {
 			where id = $1`
 	err := t.transaction.QueryRow(context.Background(), stmt, h.Id).Scan(&h.Street, &h.City, &h.State, &h.Zip)
 	if err != nil {
+		if err == pgx.ErrNoRows {
+			return fmt.Errorf("Could not find house with id: %d", h.Id)
+		}
 		return err
 	}
 	return nil

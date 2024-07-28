@@ -85,4 +85,43 @@ func TestGetHouse(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, house, getHouse)
 	})
+
+	t.Run("Get house not found fail", func(t *testing.T) {
+		transaction := setupTransaction()
+		defer transaction.Rollback()
+
+		getHouse := &db.House{Id: 1}
+		err := transaction.GetHouseById(getHouse)
+		assert.EqualError(t, err, fmt.Sprintf("Could not find house with id: %d", getHouse.Id))
+	})
+}
+
+func TestDeleteHouse(t *testing.T) {
+
+	t.Run("Delete house success", func(t *testing.T) {
+		transaction := setupTransaction()
+		defer transaction.Rollback()
+
+		house := &db.House{
+			Street: "6118 Bummy Ln",
+			City:   "Springfiled",
+			State:  "TX",
+			Zip:    69420,
+		}
+		err := transaction.CreateHouse(house)
+		assert.NoError(t, err)
+
+		getHouse := &db.House{Id: house.Id}
+		err = transaction.DeleteHouse(getHouse)
+		assert.NoError(t, err)
+	})
+
+	t.Run("Delete house not found fail", func(t *testing.T) {
+		transaction := setupTransaction()
+		defer transaction.Rollback()
+
+		getHouse := &db.House{Id: 1}
+		err := transaction.DeleteHouse(getHouse)
+		assert.EqualError(t, err, fmt.Sprintf("Could not find house with id: %d", getHouse.Id))
+	})
 }
