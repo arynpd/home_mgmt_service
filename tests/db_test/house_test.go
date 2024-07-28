@@ -9,10 +9,11 @@ import (
 )
 
 func TestCreateHouse(t *testing.T) {
-	transaction := setupTransaction()
-	defer transaction.Rollback()
 
 	t.Run("Create house success", func(t *testing.T) {
+		transaction := setupTransaction()
+		defer transaction.Rollback()
+
 		house := &db.House{
 			Street: "6118 Bummy Ln",
 			City:   "Springfiled",
@@ -28,10 +29,11 @@ func TestCreateHouse(t *testing.T) {
 }
 
 func TestUpdateHouse(t *testing.T) {
-	transaction := setupTransaction()
-	defer transaction.Rollback()
 
 	t.Run("Update house success", func(t *testing.T) {
+		transaction := setupTransaction()
+		defer transaction.Rollback()
+
 		house := &db.House{
 			Street: "6118 Bummy Ln",
 			City:   "Springfiled",
@@ -47,6 +49,9 @@ func TestUpdateHouse(t *testing.T) {
 	})
 
 	t.Run("Update house not found fail", func(t *testing.T) {
+		transaction := setupTransaction()
+		defer transaction.Rollback()
+
 		house := &db.House{
 			Id:     500,
 			Street: "Fail street",
@@ -58,5 +63,26 @@ func TestUpdateHouse(t *testing.T) {
 		err := transaction.UpdateHouse(house)
 		assert.EqualError(t, err, fmt.Sprintf("Could not find house with id: %d", house.Id))
 	})
+}
 
+func TestGetHouse(t *testing.T) {
+
+	t.Run("Get house success", func(t *testing.T) {
+		transaction := setupTransaction()
+		defer transaction.Rollback()
+
+		house := &db.House{
+			Street: "6118 Bummy Ln",
+			City:   "Springfiled",
+			State:  "TX",
+			Zip:    69420,
+		}
+		err := transaction.CreateHouse(house)
+		assert.NoError(t, err)
+
+		getHouse := &db.House{Id: house.Id}
+		err = transaction.GetHouseById(getHouse)
+		assert.NoError(t, err)
+		assert.Equal(t, house, getHouse)
+	})
 }

@@ -43,6 +43,29 @@ func (t *Transaction) UpdateHouse(h *House) error {
 	return nil
 }
 
-func (db *Db) GetHouseById(h *House) error {
+func (t *Transaction) GetHouseById(h *House) error {
+	stmt := `select street, city, state, zip 
+			from home_schema.house
+			where id = $1`
+	err := t.transaction.QueryRow(context.Background(), stmt, h.Id).Scan(&h.Street, &h.City, &h.State, &h.Zip)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (t *Transaction) DeleteHouse(h *House) error {
+	stmt := `delete
+			from home_schema.house
+			where id = $1`
+	tag, err := t.transaction.Exec(context.Background(), stmt, h.Id)
+	if err != nil {
+		return err
+	}
+
+	if tag.RowsAffected() == 0 {
+		return fmt.Errorf("Could not find house with id: %d", h.Id)
+	}
+
 	return nil
 }
