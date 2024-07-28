@@ -49,3 +49,11 @@ func (db *Db) BeginTransaction() (*Transaction, error) {
 	return t, nil
 
 }
+
+func (t *Transaction) Commit() error {
+	return t.transaction.Commit(context.Background())
+}
+
+func (t *Transaction) Rollback() error {
+	return t.transaction.Rollback(context.Background())
+}
