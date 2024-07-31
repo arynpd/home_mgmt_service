@@ -1,7 +1,7 @@
 services:
   home_mgmt:
     image: postgres:16.3
-    container_name: home_mgmt
+    container_name: home_db
     restart: always
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
