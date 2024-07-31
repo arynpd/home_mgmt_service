@@ -1,7 +1,7 @@
 services:
-  home_mgmt:
+  db:
     image: postgres:16.3
-    container_name: home_mgmt
+    container_name: home_db
     restart: always
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -9,7 +9,27 @@ services:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - 5433:5432
+    networks:
+      - home_net
+  service:
+    image: home_image:latest
+    container_name: home_service
+    restart: always
+    ports: 
+      - 8080:8080
+    depends_on:
+      db:
+        condition: service_started
+        restart: true
+    networks:
+      - home_net
+    
 volumes:
   postgres_data:
     external: true
     name: postgres_data
+
+networks:
+  home_net:
+    external: true
+    name: home_net
