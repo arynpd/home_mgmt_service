@@ -1,0 +1,19 @@
+name: service-workflow
+on:
+  push:
+    branches:
+      - 'main'
+      - 'development'
+      - 'github-actions-pipeline'
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: 1.22.5
+      - run: go get
+      - run: go build -v ./...
+      - run: go test -v ./...
+
