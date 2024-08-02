@@ -22,6 +22,7 @@ jobs:
       - name: Go test 
         run: go test -v ./...
   release:
+    needs: build
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
@@ -39,4 +40,4 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: $/home_mgmt_service:latest
+          tags: ${{secrets.DOCKERHUB_USERNAME}}/home_mgmt_service:latest
