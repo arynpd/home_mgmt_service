@@ -12,7 +12,7 @@ services:
     networks:
       - home_net
   service:
-    image: home_image:latest
+    image: arynpd/home_mgmt_service:latest
     container_name: home_service
     restart: always
     ports: 
