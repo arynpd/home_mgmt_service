@@ -55,7 +55,6 @@ jobs:
           echo "${{ secrets.SSH_SERVER_CONFIG }}" > ~/.ssh/config
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
           echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
-          cat ~/.ssh/known_hosts
       - name: SSH into server
         run: |
           ssh pserver
