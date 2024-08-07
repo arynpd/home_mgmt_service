@@ -6,46 +6,46 @@ on:
       - 'development'
       - 'github-actions-pipeline'
 jobs:
-  #build:
-  #  runs-on: ubuntu-22.04
-  #  steps:
-  #    - name: Checkout
-  #      uses: actions/checkout@v4
-  #    - name: Go setup
-  #      uses: actions/setup-go@v5
-  #      with:
-  #        go-version: 1.22.5
-  #    - name: Go dependencies
-  #      run: go get
-  #    - name: Go build
-  #      run: go build -v ./...
-  #    - name: Go test 
-  #      run: go test -v ./...
-  #release:
-  #  needs: build
-  #  runs-on: ubuntu-22.04
-  #  steps:
-  #    - name: Checkout
-  #      uses: actions/checkout@v4
-  #    - name: Login to docker hub
-  #      uses: docker/login-action@v3
-  #      with:
-  #        username: ${{ secrets.DOCKERHUB_USERNAME }}
-  #        password: ${{ secrets.DOCKERHUB_TOKEN }}
-  #    - name: Set up env file
-  #      run: echo "${{ secrets.ENV_DEVELOPMENT }}" > .env
-  #    - name: Set up docker buildx
-  #      uses: docker/setup-buildx-action@v3
-  #    - name: Build and push
-  #      uses: docker/build-push-action@v6
-  #      with:
-  #        context: .
-  #        file: ./Dockerfile
-  #        push: true
-  #        tags: ${{secrets.DOCKERHUB_USERNAME}}/home_mgmt_service:latest
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Go setup
+        uses: actions/setup-go@v5
+        with:
+          go-version: 1.22.5
+      - name: Go dependencies
+        run: go get
+      - name: Go build
+        run: go build -v ./...
+      - name: Go test 
+        run: go test -v ./...
+  release:
+    needs: build
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Login to docker hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Set up env file
+        run: echo "${{ secrets.ENV_DEVELOPMENT }}" > .env
+      - name: Set up docker buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{secrets.DOCKERHUB_USERNAME}}/home_mgmt_service:latest
   deploy:
     runs-on: ubuntu-22.04
-    #needs: release
+    needs: release
     steps:
       - name: Checkout
         uses: actions/checkout@v4
