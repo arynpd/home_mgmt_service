@@ -57,9 +57,7 @@ jobs:
           echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
       - name: SSH into server and deploy
         run: |
-          ssh pserver
-          cd ~
-          ls
+          ssh pserver && ls -a ~
       - name: Pull latest changes
         run: |
           cd ~/git/home_mgmt_service
