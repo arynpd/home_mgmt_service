@@ -43,3 +43,20 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: ${{secrets.DOCKERHUB_USERNAME}}/home_mgmt_service:latest
+  deploy:
+    runs-on: ubuntu-22.04
+    needs: release
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Create ssh keys
+        run: |
+          echo "${{ secrets.SSH_SERVER_CONFIG }}" > ~/.ssh/config
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+      - name: SSH into server
+        run: |
+          ssh pserver
+
+     
+
