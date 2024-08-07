@@ -58,6 +58,7 @@ jobs:
       - name: SSH into server and deploy
         run: |
           ssh pserver
+          cd ~
           ls
       - name: Pull latest changes
         run: |
