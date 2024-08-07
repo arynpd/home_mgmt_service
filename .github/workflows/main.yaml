@@ -55,20 +55,15 @@ jobs:
           echo "${{ secrets.SSH_SERVER_CONFIG }}" > ~/.ssh/config
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
           echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
-      - name: SSH into server and deploy
-        run: |
-          ssh pserver 'ls -a ~'
-      - name: Pull latest changes
-        run: |
-          cd ~/git/home_mgmt_service
-          git checkout development
-          git pull origin development
+      - name:Pull latest changes
+        run: ssh pserver 'cd ~/git/home_mgmt_service \ 
+        git checkout development \ 
+        git pull origin development'
       - name: Redeploy
-        run: |
-          docker compose down
-          docker pull arynpd/home_mgmt_service:latest && docker image prune -f
-          docker compose up
+        run: ssh pserver 'cd ~/git/home_mgmt_service \
+          docker compose down \
+          docker pull arynpd/home_mgmt_service:latest && docker image prune -f \
+          docker compose up'
           
-
 
 
