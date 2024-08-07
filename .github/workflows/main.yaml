@@ -58,7 +58,7 @@ jobs:
       - name: Pull latest changes
         run: ssh pserver 'cd ~/git/home_mgmt_service && git checkout github-actions-pipeline && git pull origin development'
       - name: Redeploy
-        run: ssh pserver 'cd ~/git/home_mgmt_service && docker compose down && docker pull arynpd/home_mgmt_service:latest && docker image prune -f && docker compose up'
+        run: ssh pserver 'cd ~/git/home_mgmt_service && docker compose down && docker pull arynpd/home_mgmt_service:latest && docker image prune -f && docker compose up -d'
           
 
 
