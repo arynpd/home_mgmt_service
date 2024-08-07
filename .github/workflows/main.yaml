@@ -45,7 +45,7 @@ jobs:
   #        tags: ${{secrets.DOCKERHUB_USERNAME}}/home_mgmt_service:latest
   deploy:
     runs-on: ubuntu-22.04
-    needs: release
+    #needs: release
     steps:
       - name: Checkout
         uses: actions/checkout@v4
