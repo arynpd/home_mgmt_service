@@ -59,10 +59,12 @@ jobs:
         run: |
           ssh pserver
       - name: Pull latest changes
+        run: |
           cd ~/git/home_mgmt_service
           git checkout development
           git pull origin development
       - name: Redeploy
+        run: |
           docker compose down
           docker pull arynpd/home_mgmt_service:latest && docker image prune -f
           docker compose up
