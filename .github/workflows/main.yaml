@@ -1,0 +1,63 @@
+name: service-workflow
+on:
+  push:
+    branches:
+      - 'main'
+      - 'development'
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Go setup
+        uses: actions/setup-go@v5
+        with:
+          go-version: 1.22.5
+      - name: Go dependencies
+        run: go get
+      - name: Go build
+        run: go build -v ./...
+      - name: Go test 
+        run: go test -v ./...
+  release:
+    needs: build
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Login to docker hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Set up env file
+        run: echo "${{ secrets.ENV_DEVELOPMENT }}" > .env
+      - name: Set up docker buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{secrets.DOCKERHUB_USERNAME}}/home_mgmt_service:latest
+  deploy:
+    runs-on: ubuntu-22.04
+    needs: release
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Create ssh keys
+        run: |
+          install -m 600 -D /dev/null ~/.ssh/id_ed25519
+          echo "${{ secrets.SSH_SERVER_CONFIG }}" > ~/.ssh/config
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+      - name: Pull latest changes
+        run: ssh pserver 'cd ~/git/home_mgmt_service && git checkout development && git pull origin development'
+      - name: Redeploy
+        run: ssh pserver 'cd ~/git/home_mgmt_service && docker compose down && docker pull arynpd/home_mgmt_service:latest && docker image prune -f && docker compose up -d'
+          
+
+
