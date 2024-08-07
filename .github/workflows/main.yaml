@@ -57,7 +57,7 @@ jobs:
           echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
       - name: SSH into server
         run: |
-          ssh pserver
+          ssh development@108.56.144.220
 
      
 
