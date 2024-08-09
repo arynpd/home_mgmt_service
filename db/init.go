@@ -13,10 +13,6 @@ type Db struct {
 	Pool *pgxpool.Pool
 }
 
-type Transaction struct {
-	transaction pgx.Tx
-}
-
 func (db *Db) Init() error {
 	pool, err := pgxpool.New(context.Background(), os.Getenv("DB_URL"))
 	if err != nil {
@@ -38,22 +34,22 @@ func (db *Db) Close() {
 	db.Pool.Close()
 }
 
-func (db *Db) BeginTransaction() (*Transaction, error) {
-	t := &Transaction{}
+func (db *Db) Transactional(txFunc func() error) error {
 	tx, err := db.Pool.BeginTx(context.Background(), pgx.TxOptions{})
 	if err != nil {
-		return nil, err
+		return err
+	}
+	defer tx.Rollback(context.Background())
+
+	err = txFunc()
+	if err != nil {
+		return err
 	}
 
-	t.transaction = tx
-	return t, nil
+	err = tx.Commit(context.Background())
+	if err != nil {
+		return err
+	}
 
-}
-
-func (t *Transaction) Commit() error {
-	return t.transaction.Commit(context.Background())
-}
-
-func (t *Transaction) Rollback() error {
-	return t.transaction.Rollback(context.Background())
+	return nil
 }
