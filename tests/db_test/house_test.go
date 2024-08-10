@@ -11,8 +11,7 @@ import (
 func TestCreateHouse(t *testing.T) {
 
 	t.Run("Create house success", func(t *testing.T) {
-		transaction := setupTransaction()
-		defer transaction.Rollback()
+		dbPool := setupDb()
 
 		house := &db.House{
 			Street: "6118 Bummy Ln",
@@ -21,7 +20,7 @@ func TestCreateHouse(t *testing.T) {
 			Zip:    69420,
 		}
 
-		err := transaction.CreateHouse(house)
+		err := dbPool.CreateHouse(house)
 		assert.NoError(t, err)
 
 	})
@@ -31,8 +30,7 @@ func TestCreateHouse(t *testing.T) {
 func TestUpdateHouse(t *testing.T) {
 
 	t.Run("Update house success", func(t *testing.T) {
-		transaction := setupTransaction()
-		defer transaction.Rollback()
+		dbPool := setupDb()
 
 		house := &db.House{
 			Street: "6118 Bummy Ln",
@@ -40,17 +38,16 @@ func TestUpdateHouse(t *testing.T) {
 			State:  "TX",
 			Zip:    69420,
 		}
-		err := transaction.CreateHouse(house)
+		err := dbPool.CreateHouse(house)
 		assert.NoError(t, err)
 
 		house.State = "VA"
-		err = transaction.UpdateHouse(house)
+		err = dbPool.UpdateHouse(house)
 		assert.NoError(t, err)
 	})
 
 	t.Run("Update house not found fail", func(t *testing.T) {
-		transaction := setupTransaction()
-		defer transaction.Rollback()
+		dbPool := setupDb()
 
 		house := &db.House{
 			Id:     500,
@@ -60,7 +57,7 @@ func TestUpdateHouse(t *testing.T) {
 			Zip:    21421,
 		}
 
-		err := transaction.UpdateHouse(house)
+		err := dbPool.UpdateHouse(house)
 		assert.EqualError(t, err, fmt.Sprintf("Could not find house with id: %d", house.Id))
 	})
 }
@@ -68,8 +65,7 @@ func TestUpdateHouse(t *testing.T) {
 func TestGetHouse(t *testing.T) {
 
 	t.Run("Get house success", func(t *testing.T) {
-		transaction := setupTransaction()
-		defer transaction.Rollback()
+		dbPool := setupDb()
 
 		house := &db.House{
 			Street: "6118 Bummy Ln",
@@ -77,21 +73,20 @@ func TestGetHouse(t *testing.T) {
 			State:  "TX",
 			Zip:    69420,
 		}
-		err := transaction.CreateHouse(house)
+		err := dbPool.CreateHouse(house)
 		assert.NoError(t, err)
 
 		getHouse := &db.House{Id: house.Id}
-		err = transaction.GetHouseById(getHouse)
+		err = dbPool.GetHouseById(getHouse)
 		assert.NoError(t, err)
 		assert.Equal(t, house, getHouse)
 	})
 
 	t.Run("Get house not found fail", func(t *testing.T) {
-		transaction := setupTransaction()
-		defer transaction.Rollback()
+		dbPool := setupDb()
 
-		getHouse := &db.House{Id: 1}
-		err := transaction.GetHouseById(getHouse)
+		getHouse := &db.House{Id: 500}
+		err := dbPool.GetHouseById(getHouse)
 		assert.EqualError(t, err, fmt.Sprintf("Could not find house with id: %d", getHouse.Id))
 	})
 }
@@ -99,8 +94,7 @@ func TestGetHouse(t *testing.T) {
 func TestDeleteHouse(t *testing.T) {
 
 	t.Run("Delete house success", func(t *testing.T) {
-		transaction := setupTransaction()
-		defer transaction.Rollback()
+		dbPool := setupDb()
 
 		house := &db.House{
 			Street: "6118 Bummy Ln",
@@ -108,20 +102,19 @@ func TestDeleteHouse(t *testing.T) {
 			State:  "TX",
 			Zip:    69420,
 		}
-		err := transaction.CreateHouse(house)
+		err := dbPool.CreateHouse(house)
 		assert.NoError(t, err)
 
 		getHouse := &db.House{Id: house.Id}
-		err = transaction.DeleteHouse(getHouse)
+		err = dbPool.DeleteHouse(getHouse)
 		assert.NoError(t, err)
 	})
 
 	t.Run("Delete house not found fail", func(t *testing.T) {
-		transaction := setupTransaction()
-		defer transaction.Rollback()
+		dbPool := setupDb()
 
-		getHouse := &db.House{Id: 1}
-		err := transaction.DeleteHouse(getHouse)
+		getHouse := &db.House{Id: 500}
+		err := dbPool.DeleteHouse(getHouse)
 		assert.EqualError(t, err, fmt.Sprintf("Could not find house with id: %d", getHouse.Id))
 	})
 }

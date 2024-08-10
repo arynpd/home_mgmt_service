@@ -1,7 +1,6 @@
 package db_test
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"os"
@@ -9,7 +8,6 @@ import (
 	"testing"
 
 	"github.com/arynpd/home-mgmt-service/db"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 	"github.com/ory/dockertest/v3"
 	"github.com/ory/dockertest/v3/docker"
@@ -52,14 +50,9 @@ func TestMain(m *testing.M) {
 		log.Fatalf("Could not start resource: %s", err)
 	}
 
-	var pool *pgxpool.Pool
 	if err := docker_pool.Retry(func() error {
-		var err error
-		pool, err = pgxpool.New(context.Background(), fmt.Sprintf(os.Getenv("TEST_DB_URL"), resource.GetPort("5432/tcp")))
-		if err != nil {
-			return err
-		}
-		return pool.QueryRow(context.Background(), "Select 1").Scan(new(int))
+		connString := fmt.Sprintf(os.Getenv("TEST_DB_URL"), resource.GetPort("5432/tcp"))
+		return dbPool.Init(connString)
 	}); err != nil {
 		log.Fatalf("Could not connect to database; %s", err)
 	}
@@ -70,7 +63,6 @@ func TestMain(m *testing.M) {
 		}
 	}()
 
-	dbPool.Pool = pool
 	err = setupSchema()
 	if err != nil {
 		log.Fatalf("Could not setup schema: %s", err)
@@ -79,26 +71,11 @@ func TestMain(m *testing.M) {
 	m.Run()
 }
 
-func setupSchema() error {
-	path := filepath.Join("..", "utils", "schema.sql")
-
-	c, err := os.ReadFile(path)
-	if err != nil {
-		return err
-	}
-
-	sql := string(c)
-	_, err = dbPool.Pool.Exec(context.Background(), sql)
-	if err != nil {
-		return err
-	}
-	return nil
+func setupDb() *db.Db {
+	return dbPool
 }
 
-func setupTransaction() *db.Transaction {
-	transaction, err := dbPool.BeginTransaction()
-	if err != nil {
-		log.Fatalf("Error starting transaction: %s", err)
-	}
-	return transaction
+func setupSchema() error {
+	path := filepath.Join("..", "utils", "schema.sql")
+	return dbPool.ExecFile(path)
 }

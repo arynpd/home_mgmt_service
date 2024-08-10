@@ -6,15 +6,24 @@ import (
 	"os"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type Db struct {
-	Pool *pgxpool.Pool
+type connType interface {
+	Query(ctx context.Context, sql string, args ...any) (pgx.Rows, error)
+	QueryRow(ctx context.Context, sql string, args ...any) pgx.Row
+	Exec(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error)
+	SendBatch(ctx context.Context, b *pgx.Batch) pgx.BatchResults
 }
 
-func (db *Db) Init() error {
-	pool, err := pgxpool.New(context.Background(), os.Getenv("DB_URL"))
+type Db struct {
+	pool     *pgxpool.Pool
+	connType connType
+}
+
+func (db *Db) Init(connString string) error {
+	pool, err := pgxpool.New(context.Background(), connString)
 	if err != nil {
 		return err
 	}
@@ -26,30 +35,42 @@ func (db *Db) Init() error {
 	}
 	fmt.Printf("%s\n", greeting)
 
-	db.Pool = pool
+	db.pool = pool
+	db.connType = pool
 	return nil
 }
 
 func (db *Db) Close() {
-	db.Pool.Close()
+	db.pool.Close()
 }
 
-func (db *Db) Transactional(txFunc func() error) error {
-	tx, err := db.Pool.BeginTx(context.Background(), pgx.TxOptions{})
+func (db *Db) ExecFile(filePath string) error {
+	c, err := os.ReadFile(filePath)
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(context.Background())
+
+	sql := string(c)
+	_, err = db.pool.Exec(context.Background(), sql)
+	return err
+}
+
+func (db *Db) WithTx(txFunc func() error) error {
+	tx, err := db.pool.BeginTx(context.Background(), pgx.TxOptions{})
+	if err != nil {
+		return err
+	}
+	db.connType = tx
+
+	defer func() {
+		db.connType = db.pool
+		tx.Rollback(context.Background())
+	}()
 
 	err = txFunc()
 	if err != nil {
 		return err
 	}
 
-	err = tx.Commit(context.Background())
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return tx.Commit(context.Background())
 }
