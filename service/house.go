@@ -3,15 +3,8 @@ package service
 import "github.com/arynpd/home-mgmt-service/db"
 
 func (s *Service) CreateHouse(h *db.House) error {
-	err := s.db.WithTx(func() error {
-		if err := s.db.CreateHouse(h); err != nil {
-			return err
-		}
-		return nil
+	return s.db.WithTx(func() error {
+		return s.db.CreateHouse(h)
 	})
 
-	if err != nil {
-		return err
-	}
-	return nil
 }
