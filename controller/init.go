@@ -1,6 +1,8 @@
 package controller
 
-import "github.com/arynpd/home-mgmt-service/service"
+import (
+	"github.com/arynpd/home-mgmt-service/service"
+)
 
 type Controller struct {
 	service *service.Service

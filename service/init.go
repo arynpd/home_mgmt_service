@@ -1,6 +1,8 @@
 package service
 
-import "github.com/arynpd/home-mgmt-service/db"
+import (
+	"github.com/arynpd/home-mgmt-service/db"
+)
 
 type Service struct {
 	db *db.Db

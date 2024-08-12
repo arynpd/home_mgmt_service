@@ -11,15 +11,19 @@ import (
 )
 
 type connType interface {
+	Begin(ctx context.Context) (pgx.Tx, error)
 	Query(ctx context.Context, sql string, args ...any) (pgx.Rows, error)
 	QueryRow(ctx context.Context, sql string, args ...any) pgx.Row
 	Exec(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error)
 	SendBatch(ctx context.Context, b *pgx.Batch) pgx.BatchResults
 }
 
+type options interface {
+	Close()
+}
+
 type Db struct {
-	pool     *pgxpool.Pool
-	connType connType
+	pool connType
 }
 
 func (db *Db) Init(connString string) error {
@@ -36,12 +40,13 @@ func (db *Db) Init(connString string) error {
 	fmt.Printf("%s\n", greeting)
 
 	db.pool = pool
-	db.connType = pool
 	return nil
 }
 
 func (db *Db) Close() {
-	db.pool.Close()
+	if poolOptions, ok := db.pool.(options); ok {
+		poolOptions.Close()
+	}
 }
 
 func (db *Db) ExecFile(filePath string) error {
@@ -56,15 +61,16 @@ func (db *Db) ExecFile(filePath string) error {
 }
 
 func (db *Db) WithTx(txFunc func() error) error {
-	tx, err := db.pool.BeginTx(context.Background(), pgx.TxOptions{})
+	tx, err := db.pool.Begin(context.Background())
 	if err != nil {
 		return err
 	}
-	db.connType = tx
+	origConn := db.pool
+	db.pool = tx
 
 	defer func() {
-		db.connType = db.pool
 		tx.Rollback(context.Background())
+		db.pool = origConn
 	}()
 
 	err = txFunc()
