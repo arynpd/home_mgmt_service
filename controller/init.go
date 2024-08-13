@@ -1,14 +1,16 @@
 package controller
 
-import "github.com/arynpd/home-mgmt-service/service"
+import (
+	"github.com/arynpd/home-mgmt-service/service"
+)
 
 type Controller struct {
 	service *service.Service
 }
 
-func (c *Controller) Init() error {
+func (c *Controller) Init(connString string) error {
 	s := &service.Service{}
-	err := s.Init()
+	err := s.Init(connString)
 	if err != nil {
 		return err
 	}

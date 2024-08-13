@@ -18,7 +18,7 @@ func main() {
 	}
 
 	controller := &controller.Controller{}
-	err = controller.Init()
+	err = controller.Init(os.Getenv("DB_URL"))
 	if err != nil {
 		log.Fatalf("Error connecting to database: %s\n", err.Error())
 	}
@@ -27,6 +27,12 @@ func main() {
 	router := chi.NewRouter()
 	router.Use(middleware.Logger)
 	router.Get("/healthcheck", controller.Healthcheck)
+
+	router.Route("/api", func(router chi.Router) {
+		router.Route("/house", func(router chi.Router) {
+			router.Post("/", controller.CreateHouse)
+		})
+	})
 
 	http.ListenAndServe(os.Getenv("PORT"), router)
 }

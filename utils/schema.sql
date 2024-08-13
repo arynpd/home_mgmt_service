@@ -1,12 +1,4 @@
-drop table home_schema.house cascade;
-drop table home_schema.usr cascade;
-drop table home_schema.house_to_usr cascade;
-drop table home_schema.financial_info cascade;
-drop table home_schema.rennovations cascade;
-drop table home_schema.floors cascade;
-drop table home_schema.entrance cascade;
-drop table home_schema.rooms cascade;
-drop table home_schema.measurements cascade;
+create schema home_schema;
 
 create table home_schema.house (
     id bigserial,
