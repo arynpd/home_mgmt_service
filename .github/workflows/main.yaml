@@ -14,6 +14,8 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: 1.22.5
+      - name: Set up env file
+        run: echo "${{ secrets.ENV_DEVELOPMENT }}" > .env
       - name: Go dependencies
         run: go get
       - name: Go build
