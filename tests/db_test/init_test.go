@@ -76,6 +76,6 @@ func setupDb() *db.Db {
 }
 
 func setupSchema() error {
-	path := filepath.Join("..", "utils", "schema.sql")
+	path := filepath.Join("..", "..", "utils", "schema.sql")
 	return dbPool.ExecFile(path)
 }
